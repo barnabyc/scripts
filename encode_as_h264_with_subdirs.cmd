@@ -1,21 +1,24 @@
 @echo off
 
+set logfile=d:\temp\encode_as_h264.log
+set file=%1
+
+set ffmpeg="d:\temp\ffmpeg-20170503-a75ef15-win64-static\bin\ffmpeg.exe"
+set options=-c:v libx264 -preset slow
+
+rem 100KiB = 102,400 bytes
+set minimumViableSizeBytes=102400
+
 rem enable execution-time variable expansion, instead of parse-time
 setlocal enabledelayedexpansion
 
-rem append all output of this block to the log
->>d:\temp\encode_as_h264.log (
+rem capture any output of this block to the log
+>>%logfile% (
 
-  rem 100KiB = 102,400 bytes
-  set minimumViableSizeBytes=102400
+  if "%~1"=="" echo [!date! !time!] --- No input file specified && exit /b
+  if not exist !file! echo [!date! !time!] --- Input file does not exist: !file! && exit /b
 
-  set file=%1
-
-  if not exist !file! echo --- Input file does not exist: !file! && exit /b
-
-  set ffmpeg="d:\temp\ffmpeg-20170503-a75ef15-win64-static\bin\ffmpeg.exe"
-  set options=-c:v libx264 -preset slow
-
+  echo [!date! !time!] Start processing: !file! ...
 
   rem ---
   rem parse the file properties and construct input and output paths for ffmpeg
@@ -37,7 +40,6 @@ rem append all output of this block to the log
     set renamedInput=!fileName!.converted!fileExtension!
   )
 
-
   rem ---
   rem if minimum filesize is met, call ffmpeg
   rem ---
@@ -48,15 +50,16 @@ rem append all output of this block to the log
       if exist !output! (
         rename !file! "!renamedInput!"
         del "!driveAndDirectory!!renamedInput!"
-        echo Done, converted: !file! to: !output!
+
+        echo [!date! !time!] Done, converted: !file! to: !output!
       ) else (
-        echo --- Error, output does not exist !output!
+        echo [!date! !time!] --- Error, output does not exist !output!
       )
     ) else (
-      echo --- Error converting !file!
+      echo [!date! !time!] --- Error converting !file!
     )
   ) else (
-    echo --- File size minimum not met: !fileSize! less than !minimumViableSizeBytes! !file! 
+    echo [!date! !time!] --- File size minimum not met: !fileSize! less than !minimumViableSizeBytes! !file! 
   )
 
 )
