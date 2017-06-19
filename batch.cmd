@@ -12,5 +12,6 @@ for %%i in (%pattern%) do (
 exit /b 0
 
 :error
-echo Usage: %0 ^<command^> ^<argument^>
+echo Usage: %0 ^<command^> ^<pattern^>
+echo Example: %0 encode_as_h264_with_subdirs.cmd *.avi
 exit /b 1
